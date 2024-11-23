@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3c88d7f185112bd48a51cd078564a280
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 142826
+  packageName: Low Poly Police Car 01
+  packageVersion: 1.0
+  assetPath: Assets/PoliceCar_01/Prefabs/PoliceCar_01.prefab
+  uploadId: 302029
