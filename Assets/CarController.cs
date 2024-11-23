@@ -17,9 +17,9 @@ public class CarController : MonoBehaviour
     public WheelColliders wheelColliders;
     public WheelMeshes wheelMeshes;
     public Sirens sirens;
-   
+    public HeadLights headLights;
 
-   
+
 
 
     public float enginePower;
@@ -69,6 +69,12 @@ public class CarController : MonoBehaviour
                 sirens.SirenSound.Stop();
 
             sirenIsOn = !sirenIsOn;
+        }
+
+        // turn head lights on and off
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            headLights.Toggle();
         }
 
 
@@ -172,7 +178,24 @@ public class WheelMeshes
     public MeshRenderer RL;
 }
 
+[Serializable]
+public class HeadLights
+{
+    public Light R;
+    public Light L;
 
+    public void Toggle()
+    {
+        R.enabled = !R.enabled;
+        L.enabled = !L.enabled;
+    }
+
+    public void SetOff()
+    {
+        R.enabled = false;
+        L.enabled = false;
+    }
+}
 
 [Serializable]
 public class Sirens
