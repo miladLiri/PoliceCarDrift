@@ -52,7 +52,16 @@ public class CarController : MonoBehaviour
         ApplyAcceleration();
         ApplyWheelPositions();
         ApplySiren();
+        ApplyBrake();
+    }
 
+    void ApplyBrake()
+    {
+        wheelColliders.FR.brakeTorque = brakeInput * brakePower * 0.7f;
+        wheelColliders.FL.brakeTorque = brakeInput * brakePower * 0.7f;
+
+        wheelColliders.RR.brakeTorque = brakeInput * brakePower * 0.3f;
+        wheelColliders.RL.brakeTorque = brakeInput * brakePower * 0.3f;
     }
 
     void CheckInputs()
