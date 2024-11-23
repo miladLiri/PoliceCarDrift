@@ -19,13 +19,13 @@ public class CarController : MonoBehaviour
     public Sirens sirens;
     public HeadLights headLights;
 
-
+    public AudioSource backGroundSoundTrack;
 
 
     public float enginePower;
     public float brakePower;
     public float maxSpeed;
-
+    public AnimationCurve SteeringCurve;
 
     public float gasInput;
     public float brakeInput;
@@ -37,7 +37,10 @@ public class CarController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-      
+        headLights.SetOff();
+
+        sirens.SetOff();
+        sirenTimer = 0;
 
         carRB = gameObject.GetComponent<Rigidbody>();
     }
@@ -50,18 +53,11 @@ public class CarController : MonoBehaviour
         CheckInputs();
 
         ApplyAcceleration();
+        ApplySteering();
+        ApplyBrake();
         ApplyWheelPositions();
         ApplySiren();
-        ApplyBrake();
-    }
 
-    void ApplyBrake()
-    {
-        wheelColliders.FR.brakeTorque = brakeInput * brakePower * 0.7f;
-        wheelColliders.FL.brakeTorque = brakeInput * brakePower * 0.7f;
-
-        wheelColliders.RR.brakeTorque = brakeInput * brakePower * 0.3f;
-        wheelColliders.RL.brakeTorque = brakeInput * brakePower * 0.3f;
     }
 
     void CheckInputs()
@@ -86,7 +82,31 @@ public class CarController : MonoBehaviour
             headLights.Toggle();
         }
 
+        // start engine with first gas input
+        if (Mathf.Abs(gasInput) > 0 && isEngineRunning == 0)
+        {
+            StartCoroutine(GetComponent<EngineAudio>().StartEngine());
+            backGroundSoundTrack.Play();
+        }
 
+        // Calculate the slip angle between the car's forward direction and its velocity vector
+        slipAngle = Vector3.Angle(transform.forward, carRB.linearVelocity - transform.forward);
+
+        // Determine if braking input is needed based on movement direction and gas input
+        float movingDirection = Vector3.Dot(transform.forward, carRB.linearVelocity);
+
+        if (movingDirection < -0.5f && gasInput > 0) // Moving backwards, but gas is forward
+        {
+            brakeInput = Mathf.Abs(gasInput);
+        }
+        else if (movingDirection > 0.5f && gasInput < 0) // Moving forward, but gas is backward
+        {
+            brakeInput = Mathf.Abs(gasInput);
+        }
+        else
+        {
+            brakeInput = 0; // no brake
+        }
 
     }
 
@@ -138,7 +158,33 @@ public class CarController : MonoBehaviour
         }
     }
 
-   
+    void ApplySteering()
+    {
+        // Calculate the base steering angle using the player's steering input and the speed-based steering curve
+        float steeringAngle = steeringInput * SteeringCurve.Evaluate(speed);
+
+        // Adjust the steering angle based on the slip angle to check for the car's drifting
+        if (slipAngle < 120f)
+        {
+            steeringAngle += Vector3.SignedAngle(transform.forward, carRB.linearVelocity + transform.forward, Vector3.up);
+        }
+
+        // Clamp the final steering angle to a maximum of ±90 degrees to prevent unrealistic turning
+        steeringAngle = Mathf.Clamp(steeringAngle, -90f, 90f);
+
+        wheelColliders.FR.steerAngle = steeringAngle;
+        wheelColliders.FL.steerAngle = steeringAngle;
+    }
+
+    void ApplyBrake()
+    {
+        wheelColliders.FR.brakeTorque = brakeInput * brakePower * 0.7f;
+        wheelColliders.FL.brakeTorque = brakeInput * brakePower * 0.7f;
+
+        wheelColliders.RR.brakeTorque = brakeInput * brakePower * 0.3f;
+        wheelColliders.RL.brakeTorque = brakeInput * brakePower * 0.3f;
+    }
+
 
 
     void ApplyWheelPositions()
